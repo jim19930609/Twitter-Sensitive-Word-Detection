@@ -16,10 +16,13 @@ class Parameters:
 
 
 def Clean_Files(data_dir, result_dir):
-  shutil.rmtree(data_dir)
-  os.mkdir(data_dir)
-  shutil.rmtree(result_dir)
-  os.mkdir(result_dir)
+  if os.path.exists(data_dir):
+    shutil.rmtree(data_dir)
+    os.mkdir(data_dir)
+  
+  if os.path.exists(result_dir):
+    shutil.rmtree(result_dir)
+    os.mkdir(result_dir)
 
 
 def Obtain_Filelist(root):

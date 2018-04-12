@@ -1,10 +1,19 @@
-import os
+import argparse
 import time
 import json
 import tweepy
 import dateutil.parser
 from tweepy.streaming import StreamListener
 from tweepy import Stream
+
+# External Input Flags
+parser = argparse.ArgumentParser()
+parser.add_argument('--interval', type=int, default=4,
+                    help='Twitter Streaming Interval in seconds')
+parser.add_argument('--filtword', type=str, default='trump',
+                    help='Keyword to Fetch')
+args = parser.parse_args()
+
 
 class MyListener(StreamListener):
     # Overide of tweepy's StreamListener Class, detailed process of received Json message from Twitter is defined in on_data()
@@ -15,13 +24,14 @@ class MyListener(StreamListener):
         # Receive Twitter Message -> Parse Message -> Write Message to File
         try:
             # Controls Receiving Rate
-            time.sleep(3)
+            time.sleep(args.interval)
             with open('data/python' + str(self.number) + '.txt', 'a') as f:
                 self.number += 1
                 parsed_dict = parse_tweet(data)
                 if parsed_dict is not None:
-                  print "Received Twitter Message"
+                  print ("Received Twitter Message")
                   text = str(parsed_dict['user_id']) + '|' + parsed_dict['text']
+                      
                   f.write(text)
                 return True
         except BaseException as e:
@@ -40,8 +50,8 @@ def parse_tweet(tweet_in, encoding  = 'utf-8'):
     if tweet_in and 'delete' not in tweet_in:
         parsed_dict['id']           = tweet_in['id']
         parsed_dict['geo']          = tweet_in['geo']['coordinates'] if tweet_in['geo'] else None
-        parsed_dict['text']         = tweet_in['text'].encode(encoding)
-        parsed_dict['user_id']      = tweet_in['user']['id'] 
+        parsed_dict['text']         = tweet_in['text']
+        parsed_dict['user_id']      = tweet_in['user']['id']
         parsed_dict['hashtags']     = [x['text'].encode(encoding) for x in tweet_in['entities']['hashtags']]
         parsed_dict['timestamp']    = dateutil.parser.parse(tweet_in[u'created_at']).replace(tzinfo=None).isoformat()
         parsed_dict['screen_name']  = tweet_in['user']['screen_name'].encode(encoding)
@@ -60,14 +70,17 @@ def connect_twitter():
     
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_secret)
-
+    
     return tweepy.Stream(auth=auth, listener=MyListener())
+
 
 if __name__ == "__main__":
   # Create Twitter Session
-	twitter_stream = connect_twitter()
+  twitter_stream = connect_twitter()
 
   # Filtering of Received Message
-	twitter_stream.filter(track=['trump'])
-	
+  twitter_stream.filter(track=[args.filtword])
+
+
+  
 

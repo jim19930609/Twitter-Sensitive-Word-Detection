@@ -26,13 +26,18 @@ class MyListener(StreamListener):
             # Controls Receiving Rate
             time.sleep(args.interval)
             with open('data/python' + str(self.number) + '.txt', 'a') as f:
-                self.number += 1
                 parsed_dict = parse_tweet(data)
+                parsed_dict['text'] = parsed_dict['text'].encode('ascii', 'ignore').decode('ascii')
+                
+                if len(parsed_dict['text']) == 0:
+                  return True
+
                 if parsed_dict is not None:
-                  print ("Received Twitter Message")
-                  text = str(parsed_dict['user_id']) + '|' + parsed_dict['text']
-                      
+                  text = str(parsed_dict['user_id']) + '|' + parsed_dict['text']              
                   f.write(text)
+                
+                self.number += 1
+        
                 return True
         except BaseException as e:
             print("Error on_data: %s" % str(e))
@@ -77,7 +82,7 @@ def connect_twitter():
 if __name__ == "__main__":
   # Create Twitter Session
   twitter_stream = connect_twitter()
-
+  
   # Filtering of Received Message
   twitter_stream.filter(track=[args.filtword])
 

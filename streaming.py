@@ -10,6 +10,7 @@ from nltk import word_tokenize
 from gensim import corpora, models
 from pyspark import SparkConf, SparkContext
 from pyspark.streaming import StreamingContext
+from hate_offensive.predict_scores import get_score
 
 # External Input Flags
 parser = argparse.ArgumentParser()
@@ -70,6 +71,16 @@ def Keywords_Filtering(stream):
   m = stream.map(filtering)
   return m
 
+def LogisticModel_Filtering(stream):
+  def LogisticFiltering(x):
+    message = x.split("|||")[0]
+    hate, offense = get_score(message)
+    
+    return x + "|||" + str(hate[0]) + "|||" + str(offense[0])
+    
+  m = stream.map(LogisticFiltering)
+  
+  return m
 
 def TopicModel_Filtering(stream):
   def clean_word(word):
@@ -140,7 +151,8 @@ def Streaming_main(root):
     
     # Filtering
     messages_TPFilt = TopicModel_Filtering(messages_window)
-    messages_KWFilt = Keywords_Filtering(messages_TPFilt)
+    messages_LogisticFilt = LogisticModel_Filtering(messages_TPFilt)
+    messages_KWFilt = Keywords_Filtering(messages_LogisticFilt)
 
     # Output
     messages_KWFilt.foreachRDD(Output_Function)

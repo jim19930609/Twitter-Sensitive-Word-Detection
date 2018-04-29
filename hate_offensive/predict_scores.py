@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
 import re, string
@@ -9,7 +10,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 import pickle
 
-f = open('my_pred.pickle', 'rb')
+f = open('hate_offensive/my_pred.pickle', 'rb')
 m_ob = pickle.load(f)
 r_ob = pickle.load(f)
 m_hb = pickle.load(f)
@@ -37,9 +38,10 @@ def get_score(comment):
     preds2 = m_ob.predict_proba(tfidf_test_ob.multiply(r_ob))[:,1]
     return preds1, preds2
 
-
+'''
 comment="from now on, I will only go on dates with girls who show me their transcripts first"
 # input("new tweet?")
 
 hate_score,offensive_score=get_score(comment)
 print(hate_score,offensive_score)
+'''

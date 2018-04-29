@@ -115,11 +115,12 @@ def start_streaming():
       sp = content_result.split("|||")
       content = sp[0]
       LDA_level = int(sp[1])
-      Keywords = sp[2:]
+      lg_hate, lg_offen = [str(sp[2]), str(sp[3])]
+      Keywords = sp[4:]
       
-      #var_tp.set("LDA Topic Number: " + str(LDA_level))
       var_kw.set(" ".join(Keywords))
-      
+      var_lg_hate.set(lg_hate[:6])
+      var_lg_offen.set(lg_offen[:6])    
       tp_color = convert_dic[LDA_level]
 
       T_TP.configure(background=tp_color)
@@ -149,8 +150,8 @@ if __name__ == "__main__":
   var_orig = tk.StringVar()
   var_result = tk.StringVar()
   
-  label_orig = tk.Label(window, textvariable = var_orig, bg='green', font=('Arial', 15), width=40, height=10, wraplength = 300).grid(row=1,rowspan=4,column=3,columnspan=3,pady=5,padx=20)
-  label_result = tk.Label(window, textvariable = var_result, bg='blue', font=('Arial', 15), width=40, height=10, wraplength = 300).grid(row=1,rowspan=4,column=6,columnspan=3,pady=5,padx=20)
+  label_orig = tk.Label(window, textvariable = var_orig, bg='#ccf3ff', font=('Arial', 15), width=40, height=10, wraplength = 300).grid(row=1,rowspan=4,column=3,columnspan=3,pady=5,padx=20)
+  label_result = tk.Label(window, textvariable = var_result, bg='#ffddcc', font=('Arial', 15), width=40, height=10, wraplength = 300).grid(row=1,rowspan=4,column=6,columnspan=3,pady=5,padx=20)
   
 
   # Define Input Box
@@ -193,11 +194,20 @@ if __name__ == "__main__":
   
   var_tp = tk.StringVar()
   var_kw = tk.StringVar()
+  var_lg_hate = tk.StringVar()
+  var_lg_offen = tk.StringVar()
+  
   var_tp.set("LDA Topic Level")
+  var_lg_hate.set("Hate Score")
+  var_lg_offen.set("Offensive Score")
   var_kw.set("Keywords")
   
   T_TP   = tk.Label(window, textvariable = var_tp, bg='gray', font=('Arial', 10), width=20, height=2)
+  T_LG_hate   = tk.Label(window, textvariable = var_lg_hate, bg='gray', font=('Arial', 10), width=20, height=2)
+  T_LG_offen   = tk.Label(window, textvariable = var_lg_offen, bg='gray', font=('Arial', 10), width=20, height=2)
   T_KW   = tk.Label(window, textvariable = var_kw, bg='gray', font=('Arial', 10), width=30, height=2)
+  T_LG_hate.grid(row=0,column=4,pady=5,padx=20,sticky='e')
+  T_LG_offen.grid(row=0,column=5,pady=5,padx=20,sticky='e')
   T_TP.grid(row=0,column=6,pady=5,padx=20,sticky='w')
   T_KW.grid(row=0,column=7,pady=5,padx=20,sticky='w')
   

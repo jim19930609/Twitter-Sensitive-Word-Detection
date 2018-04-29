@@ -137,9 +137,16 @@ def start_streaming():
 if __name__ == "__main__":
   # Preprocess & Init
   params = Parameters()
-
+  
   data_dir = "data/"
   result_dir = "result/"
+
+  if os.path.exists(result_dir):
+    shutil.rmtree(result_dir)
+  if os.path.exists(data_dir):
+    shutil.rmtree(data_dir)
+  os.mkdir(data_dir)
+  os.mkdir(result_dir)
 
   # Define Window Object
   window = tk.Tk()

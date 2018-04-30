@@ -1,7 +1,8 @@
+import os
 import random
 import pickle
 import nltk
-import prepro
+import SentAnal.prepro as prepro
 import ssl
 
 try:
@@ -11,7 +12,7 @@ except AttributeError:
 else:
     ssl._create_default_https_context = _create_unverified_https_context
 
-nltk.download('all')
+#nltk.download('all')
 
 
 def collect_data(input_dir, forTest=False):
@@ -149,6 +150,10 @@ def get_label(model_dir, raw_tweet):
     for item in single_list:
         pred_label = model.classify(item[0])
         label.append(pred_label)
+
+    if os.path.exists(single_csv):
+      os.remove(single_csv)
+
     return label[0]
 
 

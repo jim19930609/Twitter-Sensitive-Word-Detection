@@ -11,6 +11,7 @@ from gensim import corpora, models
 from pyspark import SparkConf, SparkContext
 from pyspark.streaming import StreamingContext
 from hate_offensive.predict_scores import get_score
+from SentAnal.nltk_maxent import get_label
 
 # External Input Flags
 parser = argparse.ArgumentParser()
@@ -22,6 +23,7 @@ parser.add_argument('--windsize', type=int, default=1,
                     help='Window Size')
 args = parser.parse_args()
 
+
 def Output_Function(rdd):
   def Write2File(content):
     with open("result/" + str(int(time.time())) + ".txt", "a") as f:
@@ -29,6 +31,7 @@ def Output_Function(rdd):
 
   rdd.foreach(Write2File)
   
+
 def Keywords_Filtering(stream):
   '''
   Split sentences into words, Then replace sensitive words with ***** according to the dictionary
@@ -71,6 +74,20 @@ def Keywords_Filtering(stream):
   m = stream.map(filtering)
   return m
 
+
+def MaxentModel_Filtering(stream):
+  def MaxentFiltering(x):
+    message = x.split("|||")[0]
+    model_path = "SentAnal/maxent_classifier.pickle"
+    maxent_label = get_label(model_path, message)
+    
+    return x + "|||" + str(maxent_label)
+    
+  m = stream.map(MaxentFiltering)
+  
+  return m
+
+
 def LogisticModel_Filtering(stream):
   def LogisticFiltering(x):
     message = x.split("|||")[0]
@@ -81,6 +98,7 @@ def LogisticModel_Filtering(stream):
   m = stream.map(LogisticFiltering)
   
   return m
+
 
 def TopicModel_Filtering(stream):
   def clean_word(word):
@@ -152,7 +170,8 @@ def Streaming_main(root):
     # Filtering
     messages_TPFilt = TopicModel_Filtering(messages_window)
     messages_LogisticFilt = LogisticModel_Filtering(messages_TPFilt)
-    messages_KWFilt = Keywords_Filtering(messages_LogisticFilt)
+    messages_MaxentFilt = MaxentModel_Filtering(messages_LogisticFilt)
+    messages_KWFilt = Keywords_Filtering(messages_MaxentFilt)
 
     # Output
     messages_KWFilt.foreachRDD(Output_Function)
@@ -165,10 +184,6 @@ if __name__ == "__main__":
   # Irrelevent Parameters Setting
   check_point = "check_point"
   root = "data"
-  try:
-    shutil.rmtree(check_point)
-  except:
-    pass
 
   # Major Entrance of streaming definations
   ssc = StreamingContext.getOrCreate(check_point, lambda: Streaming_main(root))

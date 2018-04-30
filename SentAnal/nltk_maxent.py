@@ -4,14 +4,14 @@ import nltk
 import prepro
 import ssl
 
-# try:
-#     _create_unverified_https_context = ssl._create_unverified_context
-# except AttributeError:
-#     pass
-# else:
-#     ssl._create_default_https_context = _create_unverified_https_context
-#
-# nltk.download('all')
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+nltk.download('all')
 
 
 def collect_data(input_dir, forTest=False):
@@ -158,8 +158,8 @@ if __name__ == '__main__':
     model_dir = './maxent_classifier.pickle'
     result_dir = './dataset/pred_result.csv'
 
-    # classifier = train(train_file_dir, model_dir, num_iter=10)
-    # result = predict(classifier, test_file_dir, result_dir)
+    classifier = train(train_file_dir, model_dir, num_iter=10)
+    result = predict(classifier, test_file_dir, result_dir)
 
     eg_tweet = 'You a lame if you fuck over a great person who’s always been down for you since day one'
     print('Current tweet: ', eg_tweet)
